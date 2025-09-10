@@ -124,6 +124,29 @@
       font-size: 12px;
       color: #ccc;
     }
+    #gameOverOverlay {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #gameOverText {
+      background: rgba(0,0,0,0.85);
+      color: #00ffff;
+      font-size: 2.6rem;
+      font-weight: bold;
+      border-radius: 16px;
+      padding: 40px 60px;
+      border: 2px solid #00ffff;
+      box-shadow: 0 4px 24px rgba(0,255,255,0.14);
+      text-shadow: 0 2px 10px #00ffff88;
+      letter-spacing: 0.15em;
+      font-family: 'Roboto', sans-serif;
+    }
     @media (max-width: 700px) {
       #tetrisContainer {
         flex-direction: row;
@@ -150,12 +173,14 @@
       button {
         font-size: 12px; padding: 5px 9px;
       }
+      #gameOverText { font-size: 1.6rem; padding: 18px 20px; }
     }
     @media (max-width: 400px) {
       .canvas-stack, #gridBg, #tetris { width: 100px; height: 200px; }
       #info { width: 60px; min-width: 44px; font-size: 10px;}
       #nextCanvas { width: 22px; height: 22px;}
       button { font-size: 10px; padding: 3px 5px;}
+      #gameOverText { font-size: 1rem; padding: 8px 9px; }
     }
   </style>
 </head>
@@ -164,11 +189,14 @@
   <div class="canvas-stack">
     <canvas id="gridBg" width="300" height="600"></canvas>
     <canvas id="tetris" width="300" height="600"></canvas>
+    <div id="gameOverOverlay" style="display:none;">
+      <div id="gameOverText">GAME OVER</div>
+    </div>
   </div>
   <div id="info">
     <div id="score">Score: 0</div>
     <div id="level">Level: 1</div>
-    <div id="speed">Speed: 1000ms</div>
+    <div id="speed">Speed: 1</div>
     <div>Next:</div>
     <canvas id="nextCanvas" width="80" height="80"></canvas>
     <div id="bestScore">Best Score<br><span id="best">0</span></div>
@@ -180,7 +208,7 @@
   </div>
 </div>
 <script>
-// Ghost Grid Drawing
+// Ghost grid
 const gridBgCanvas = document.getElementById('gridBg');
 const gridBgCtx = gridBgCanvas.getContext('2d');
 function drawGridBg(cellW, cellH, cols, rows) {
@@ -214,6 +242,9 @@ ctx.scale(25, 25);
 const nextCanvas = document.getElementById('nextCanvas');
 const nctx = nextCanvas.getContext('2d');
 nctx.scale(10, 10);
+
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+let gameOver = false;
 
 const arenaWidth = 12, arenaHeight = 24;
 const colors = [null, '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA726', '#AB47BC', '#5E35B1', '#FFEB3B'];
@@ -273,10 +304,9 @@ function playerReset() {
   nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
   updateNext();
   if(collide(arena, player)) {
-    arena.forEach(row => row.fill(0));
-    score = 0; level = 1; dropInterval = 1000;
-    updateScore(); updateLevel(); updateSpeed();
-    playerReset();
+    gameOver = true;
+    showGameOver();
+    return;
   }
 }
 function getFilledRows() {
@@ -334,7 +364,7 @@ function playerSweep() {
   }
 }
 function playerDrop() {
-  if(fastDropAnimating || flashAnimating) return;
+  if(gameOver || fastDropAnimating || flashAnimating) return;
   player.pos.y++;
   if(collide(arena, player)) {
     player.pos.y--;
@@ -346,10 +376,12 @@ function playerDrop() {
   dropCounter = 0;
 }
 function playerMove(dir) {
+  if(gameOver) return;
   player.pos.x += dir;
   if(collide(arena, player)) player.pos.x -= dir;
 }
 function playerRotate(dir) {
+  if(gameOver) return;
   const pos = player.pos.x;
   rotate(player.matrix, dir);
   let offset = 1;
@@ -423,7 +455,7 @@ function draw() {
   ctx.restore();
 }
 function update(time=0) {
-  if(paused) {
+  if(paused || gameOver) {
     requestAnimationFrame(update);
     return;
   }
@@ -467,7 +499,10 @@ function updateLevel() {
   document.getElementById('level').innerText = `Level: ${level}`;
 }
 function updateSpeed() {
-  document.getElementById('speed').innerText = `Speed: ${Math.floor(Math.max(100, dropInterval/level))}ms`;
+  // Speed: 1 (en yavaş) -> Speed: 20 (en hızlı)
+  // Speed = min(20, Math.floor(level * (20/15)))  (Level 15'te hız 20 olur)
+  let speed = Math.min(20, Math.max(1, Math.floor(level * (20/15))));
+  document.getElementById('speed').innerText = `Speed: ${speed}`;
 }
 function updateNext() {
   nctx.clearRect(0,0,nextCanvas.width/10,nextCanvas.height/10);
@@ -481,6 +516,13 @@ function updateNext() {
 }
 function updateBestScore() {
   document.getElementById('best').innerText = bestScore;
+}
+
+function showGameOver() {
+  gameOverOverlay.style.display = "";
+}
+function hideGameOver() {
+  gameOverOverlay.style.display = "none";
 }
 
 // Kontroller
@@ -514,14 +556,18 @@ document.getElementById('muteBtn').addEventListener('click', () => {
 document.getElementById('resetBtn').addEventListener('click', () => {
   arena.forEach(r => r.fill(0));
   score = 0; level = 1; dropInterval = 1000;
+  hideGameOver();
+  gameOver = false;
   playerReset();
   updateScore(); updateLevel(); updateSpeed();
 });
 document.getElementById('pauseBtn').addEventListener('click', () => {
+  if(gameOver) return;
   paused = !paused;
   document.getElementById('pauseBtn').innerText = paused ? 'Resume' : 'Pause';
 });
 document.addEventListener('keydown', event => {
+  if(gameOver) return;
   if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' '].includes(event.key)) event.preventDefault();
   if(paused && event.key !== 'Escape') return;
   if(event.key === 'ArrowLeft') playerMove(-1);
@@ -536,6 +582,7 @@ document.addEventListener('keydown', event => {
       fastDropTargetY++;
     fastDropAnimating = true;
   } else if(event.key === 'Escape') {
+    if(gameOver) return;
     paused = !paused;
     document.getElementById('pauseBtn').innerText = paused ? 'Resume' : 'Pause';
   }
