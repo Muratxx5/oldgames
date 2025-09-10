@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bilardo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #1a1a1a;
+  }
+  canvas {
+    border: 2px solid #333;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  }
+</style>
+</head>
+<body>
+<script>
+let Engine = Matter.Engine,
+    World = Matter.World,
+    Bodies = Matter.Bodies,
+    Body = Matter.Body,
+    Events = Matter.Events;
+
+let engine, world;
+let balls = [];
+let cueBall;
+let cushions = [];
+let pockets = [];
+let aiming = false;
+let aimStart;
+
+function setup() {
+  createCanvas(800, 400);
+  engine = Engine.create();
+  world = engine.world;
+  world.gravity.y = 0;
+
+  // Masanın sınırları
+  let thickness = 30;
+  cushions.push(Bodies.rectangle(width/2, -thickness/2, width, thickness, {isStatic:true}));
+  cushions.push(Bodies.rectangle(width/2, height+thickness/2, width, thickness, {isStatic:true}));
+  cushions.push(Bodies.rectangle(-thickness/2, height/2, thickness, height, {isStatic:true}));
+  cushions.push(Bodies.rectangle(width+thickness/2, height/2, thickness, height, {isStatic:true}));
+  World.add(world, cushions);
+
+  // Cepler
+  let r = 22;
+  let pocketPos = [
+    [0,0],[width/2,0],[width,0],
+    [0,height],[width/2,height],[width,height]
+  ];
+  pocketPos.forEach(p => { pockets.push({x:p[0],y:p[1],r:r}); });
+
+  // Beyaz top
+  cueBall = Bodies.circle(200, height/2, 12, {restitution:0.95, friction:0.01});
+  balls.push({body: cueBall, color:"#ffffff", num:0});
+  World.add(world, cueBall);
+
+  // Renkli toplar (1-15)
+  let colors = [
+    "#FFD700","#0000FF","#FF0000","#800080","#FFA500","#008000","#800000",
+    "#000000","#FFD700","#0000FF","#FF0000","#800080","#FFA500","#008000","#800000"
+  ];
+  let startX = 600, startY = height/2;
+  let idx=1;
+  for(let row=0; row<5; row++){
+    for(let col=0; col<=row; col++){
+      let x = startX + row*26;
+      let y = startY - row*14 + col*28;
+      let ball = Bodies.circle(x,y,12,{restitution:0.95, friction:0.01});
+      balls.push({body:ball, color:colors[idx-1], num:idx});
+      World.add(world, ball);
+      idx++;
+      if(idx>15) break;
+    }
+  }
+}
+
+function draw() {
+  background(20,120,20);
+
+  Engine.update(engine);
+
+  // Delikler
+  fill(0); noStroke();
+  for(let p of pockets){ circle(p.x,p.y,p.r*2); }
+
+  // Toplar
+  for(let b of balls){
+    let pos = b.body.position;
+    fill(b.color);
+    stroke(0); strokeWeight(1);
+    circle(pos.x,pos.y,24);
+
+    // Numara
+    fill(b.color=="#000000"?"white":"black");
+    noStroke();
+    textAlign(CENTER,CENTER);
+    textSize(12);
+    if(b.num>0) text(b.num,pos.x,pos.y);
+  }
+
+  // İstaka çizgisi (fare ile çekme)
+  if(aiming){
+    let len = dist(cueBall.position.x,cueBall.position.y,mouseX,mouseY);
+    stroke(255,0,0);
+    strokeWeight(map(len,0,100,1,6));
+    line(cueBall.position.x,cueBall.position.y,mouseX,mouseY);
+  }
+
+  // Delik kontrolü
+  for(let p of pockets){
+    for(let i=balls.length-1;i>=0;i--){
+      let b = balls[i];
+      let pos = b.body.position;
+      if(dist(pos.x,pos.y,p.x,p.y)<p.r){
+        World.remove(world,b.body);
+        balls.splice(i,1);
+      }
+    }
+  }
+}
+
+function mousePressed(){
+  if(dist(mouseX,mouseY,cueBall.position.x,cueBall.position.y)<15){
+    aiming = true;
+  }
+}
+
+function mouseReleased(){
+  if(aiming){
+    let dx = cueBall.position.x - mouseX;
+    let dy = cueBall.position.y - mouseY;
+    let force = constrain(sqrt(dx*dx+dy*dy)*0.02,0,10);
+    Body.setVelocity(cueBall,{x:dx*0.1,y:dy*0.1});
+    aiming = false;
+  }
+}
+</script>
+</body>
+</html>
