@@ -39,39 +39,33 @@
     }
     .canvas-stack {
       position: relative;
-      width: 300px;
-      height: 600px;
-      min-width: 180px;
-      min-height: 360px;
+      min-width: 90px;
+      min-height: 180px;
     }
-    #gridBg {
+    #gridBg, #tetris {
       position: absolute;
       left: 0; top: 0;
       z-index: 0;
-      width: 300px;
-      height: 600px;
-      pointer-events: none;
       border-radius: 12px;
+      border: none;
+      background: transparent;
+      display: block;
+      box-sizing: border-box;
     }
     #tetris {
-      position: absolute;
-      left: 0; top: 0;
       z-index: 1;
-      width: 300px; height: 600px;
-      border-radius: 12px;
       border: 2px solid rgba(0,255,255,0.4);
       box-shadow: 0 0 20px rgba(0,255,255,0.13);
-      display: block;
-      background: transparent;
     }
     #info {
       display: flex;
       flex-direction: column;
       gap: 14px;
-      width: 180px;
-      min-width: 90px;
       align-items: stretch;
       flex-shrink: 0;
+      min-width: 90px;
+      min-height: 180px;
+      transition: all 0.2s;
     }
     #info div {
       background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(255,255,255,0.04));
@@ -89,9 +83,10 @@
     #nextCanvas {
       background: #000;
       border-radius: 8px;
-      width: 80px; height: 80px;
       border: none;
       margin-bottom: 6px;
+      box-sizing: border-box;
+      transition: width 0.2s, height 0.2s;
     }
     #controls {
       display: flex;
@@ -99,6 +94,7 @@
       gap: 8px;
       justify-content: center;
       margin-top: 12px;
+      transition: gap 0.2s, margin-top 0.2s;
     }
     button {
       padding: 9px 13px;
@@ -110,6 +106,8 @@
       cursor: pointer;
       transition: all 0.3s;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      font-size: 16px;
+      min-width: 60px;
     }
     button:hover {
       background: linear-gradient(135deg, rgba(255,255,0,0.8), rgba(255,0,255,0.8));
@@ -156,19 +154,12 @@
         padding: 6px;
       }
       .canvas-stack {
-        width: 180px; height: 360px;
-        min-width: 120px; min-height: 240px;
-      }
-      #gridBg, #tetris {
-        width: 180px; height: 360px;
+        min-width: 60px; min-height: 120px;
       }
       #info {
-        width: 110px;
-        min-width: 80px;
+        min-width: 60px;
+        min-height: 120px;
         font-size: 13px;
-      }
-      #nextCanvas {
-        width: 44px; height: 44px;
       }
       button {
         font-size: 12px; padding: 5px 9px;
@@ -176,9 +167,8 @@
       #gameOverText { font-size: 1.6rem; padding: 18px 20px; }
     }
     @media (max-width: 400px) {
-      .canvas-stack, #gridBg, #tetris { width: 100px; height: 200px; }
-      #info { width: 60px; min-width: 44px; font-size: 10px;}
-      #nextCanvas { width: 22px; height: 22px;}
+      .canvas-stack { min-width: 40px; min-height: 80px;}
+      #info { min-width: 40px; min-height: 80px; font-size: 10px;}
       button { font-size: 10px; padding: 3px 5px;}
       #gameOverText { font-size: 1rem; padding: 8px 9px; }
     }
@@ -208,9 +198,62 @@
   </div>
 </div>
 <script>
-// Ghost grid
+let scale = 0.5
+; // 0.5 veya 1 ile oynayabilirsin
+
 const gridBgCanvas = document.getElementById('gridBg');
 const gridBgCtx = gridBgCanvas.getContext('2d');
+const canvas = document.getElementById('tetris');
+const ctx = canvas.getContext('2d');
+const nextCanvas = document.getElementById('nextCanvas');
+const nctx = nextCanvas.getContext('2d');
+const gameOverOverlay = document.getElementById('gameOverOverlay');
+const infoPanel = document.getElementById('info');
+const controlsPanel = document.getElementById('controls');
+function updateCanvasSizes() {
+  // Oyun alanı
+  const baseW = 300, baseH = 600;
+  gridBgCanvas.width = baseW * scale;
+  gridBgCanvas.height = baseH * scale;
+  canvas.width = baseW * scale;
+  canvas.height = baseH * scale;
+  gridBgCanvas.style.width = (baseW * scale) + "px";
+  gridBgCanvas.style.height = (baseH * scale) + "px";
+  canvas.style.width = (baseW * scale) + "px";
+  canvas.style.height = (baseH * scale) + "px";
+  gameOverOverlay.style.width = (baseW * scale) + "px";
+  gameOverOverlay.style.height = (baseH * scale) + "px";
+  document.querySelector('.canvas-stack').style.width = (baseW * scale) + "px";
+  document.querySelector('.canvas-stack').style.height = (baseH * scale) + "px";
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // reset
+  ctx.scale((baseW*scale)/arenaWidth, (baseH*scale)/arenaHeight);
+  gridBgCtx.setTransform(1, 0, 0, 1, 0, 0); // reset
+
+  // Bilgi paneli ölçekleme
+  infoPanel.style.width = (180 * scale) + "px";
+  infoPanel.style.minWidth = (90 * scale) + "px";
+  infoPanel.style.fontSize = (16 * scale) + "px";
+  infoPanel.style.gap = (14 * scale) + "px";
+
+  // Kontrol butonları ölçekleme
+  controlsPanel.style.gap = (8 * scale) + "px";
+  controlsPanel.style.marginTop = (12 * scale) + "px";
+  Array.from(controlsPanel.querySelectorAll('button')).forEach(btn => {
+    btn.style.fontSize = (16 * scale) + "px";
+    btn.style.padding = (9 * scale) + "px " + (13 * scale) + "px";
+    btn.style.minWidth = (60 * scale) + "px";
+  });
+
+  // Next preview ölçeklemesi
+  nextCanvas.width = 80 * scale;
+  nextCanvas.height = 80 * scale;
+  nextCanvas.style.width = (80 * scale) + "px";
+  nextCanvas.style.height = (80 * scale) + "px";
+  nctx.setTransform(1, 0, 0, 1, 0, 0); // reset
+  nctx.scale(10 * scale, 10 * scale);
+  drawGridBg((baseW * scale)/12, (baseH * scale)/24, 12, 24);
+  updateNext();
+}
 function drawGridBg(cellW, cellH, cols, rows) {
   gridBgCtx.clearRect(0,0,gridBgCanvas.width,gridBgCanvas.height);
   for(let y=0; y<rows; ++y) {
@@ -226,26 +269,9 @@ function drawGridBg(cellW, cellH, cols, rows) {
   gridBgCtx.lineWidth = 2;
   gridBgCtx.strokeRect(0,0,gridBgCanvas.width,gridBgCanvas.height);
 }
-function resizeGridBg() {
-  let w = gridBgCanvas.clientWidth, h = gridBgCanvas.clientHeight;
-  gridBgCanvas.width = w; gridBgCanvas.height = h;
-  drawGridBg(w/12, h/24, 12, 24);
-}
-window.addEventListener('resize', resizeGridBg);
-resizeGridBg();
+window.addEventListener('resize', updateCanvasSizes);
 
 // --- TETRIS LOGIC ---
-const canvas = document.getElementById('tetris');
-const ctx = canvas.getContext('2d');
-ctx.scale(25, 25);
-
-const nextCanvas = document.getElementById('nextCanvas');
-const nctx = nextCanvas.getContext('2d');
-nctx.scale(10, 10);
-
-const gameOverOverlay = document.getElementById('gameOverOverlay');
-let gameOver = false;
-
 const arenaWidth = 12, arenaHeight = 24;
 const colors = [null, '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA726', '#AB47BC', '#5E35B1', '#FFEB3B'];
 const pieces = 'ILJOTSZ'.split('');
@@ -499,8 +525,6 @@ function updateLevel() {
   document.getElementById('level').innerText = `Level: ${level}`;
 }
 function updateSpeed() {
-  // Speed: 1 (en yavaş) -> Speed: 20 (en hızlı)
-  // Speed = min(20, Math.floor(level * (20/15)))  (Level 15'te hız 20 olur)
   let speed = Math.min(20, Math.max(1, Math.floor(level * (20/15))));
   document.getElementById('speed').innerText = `Speed: ${speed}`;
 }
@@ -517,7 +541,6 @@ function updateNext() {
 function updateBestScore() {
   document.getElementById('best').innerText = bestScore;
 }
-
 function showGameOver() {
   gameOverOverlay.style.display = "";
 }
@@ -525,18 +548,17 @@ function hideGameOver() {
   gameOverOverlay.style.display = "none";
 }
 
-// Kontroller
 let dropCounter = 0, dropInterval = 1000, lastTime = 0;
 let score = 0, level = 1, fastDrop = false, paused = false;
 let fastDropAnimating = false, fastDropTargetY = 0, fastDropSpeed = 0.5;
 let shakeTimer = 0, shakeDuration = 100;
 let muted = false;
 let bestScore = localStorage.getItem('tetrisBestScore') || 0;
+let gameOver = false;
 const arena = createMatrix(arenaWidth, arenaHeight);
 const player = { pos: {x:0, y:0}, matrix: null };
 let nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
 
-// Ses Fonksiyonu
 function playSound(freq, duration) {
   try {
     const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
@@ -567,6 +589,16 @@ document.getElementById('pauseBtn').addEventListener('click', () => {
   document.getElementById('pauseBtn').innerText = paused ? 'Resume' : 'Pause';
 });
 document.addEventListener('keydown', event => {
+  // GAME OVER ise R tuşu ile reset
+  if(gameOver && event.key.toLowerCase() === 'r') {
+    arena.forEach(r => r.fill(0));
+    score = 0; level = 1; dropInterval = 1000;
+    hideGameOver();
+    gameOver = false;
+    playerReset();
+    updateScore(); updateLevel(); updateSpeed();
+    return;
+  }
   if(gameOver) return;
   if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' '].includes(event.key)) event.preventDefault();
   if(paused && event.key !== 'Escape') return;
@@ -589,6 +621,7 @@ document.addEventListener('keydown', event => {
 });
 
 // Başlat
+updateCanvasSizes();
 playerReset();
 updateScore(); updateLevel(); updateSpeed(); updateBestScore();
 update();
