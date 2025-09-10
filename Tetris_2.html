@@ -1,125 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Modern Aesthetic Tetris</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-
-body {
-  margin: 0;
-  font-family: 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #0f0f0f 0%, #1f1f1f 50%, #2c2c2c 100%);
-  color: #ffffff;
-  overflow: hidden;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-body::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: radial-gradient(circle at center, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
-  z-index: -1;
-}
-
-#tetrisContainer {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  align-items: flex-start;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 255, 255, 0.3);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-canvas {
-  background: #000;
-  display: block;
-  border-radius: 12px;
-  border: 2px solid rgba(0, 255, 255, 0.5);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
-}
-
-#tetris {
-  width: 300px;
-  height: 600px;
-}
-
-#info {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  width: 200px;
-}
-
-#info div {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.05));
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-#info div:hover {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 255, 255, 0.2));
-  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
-}
-
-#nextCanvas {
-  background: #000;
-  border: none;
-  border-radius: 8px;
-  width: 80px;
-  height: 80px;
-}
-
-#controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 15px;
-}
-
-button {
-  padding: 10px 15px;
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.8), rgba(0, 255, 0, 0.8));
-  color: #000;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-button:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 0, 0.8), rgba(255, 0, 255, 0.8));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-#bestScore {
-  margin-top: 10px;
-  text-align: center;
-}
-
-#bestScore span {
-  font-size: 12px;
-  color: #ccc;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modern Tetris</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #222 0%, #1a1a1a 70%, #222 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    #tetrisContainer {
+      display: flex;
+      flex-direction: row;
+      gap: 24px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,255,255,0.18);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 24px;
+      align-items: flex-start;
+    }
+    canvas {
+      background: #000;
+      border-radius: 12px;
+      border: 2px solid rgba(0,255,255,0.4);
+      box-shadow: 0 0 20px rgba(0,255,255,0.13);
+      display: block;
+    }
+    #tetris {
+      width: 300px; height: 600px;
+    }
+    #info {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 180px;
+    }
+    #info div {
+      background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(255,255,255,0.04));
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.09);
+      color: #fff;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    #info div:hover {
+      background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(0,255,255,0.2));
+      box-shadow: 0 4px 12px rgba(0,255,255,0.15);
+    }
+    #nextCanvas {
+      background: #000;
+      border-radius: 8px;
+      width: 80px; height: 80px;
+      border: none;
+      margin-bottom: 6px;
+    }
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    button {
+      padding: 9px 13px;
+      background: linear-gradient(135deg, rgba(0,255,255,0.8), rgba(0,255,0,0.8));
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background: linear-gradient(135deg, rgba(255,255,0,0.8), rgba(255,0,255,0.8));
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    #bestScore {
+      margin-top: 7px;
+      text-align: center;
+    }
+    #bestScore span {
+      font-size: 12px;
+      color: #ccc;
+    }
+    @media (max-width: 700px) {
+      #tetrisContainer { flex-direction: column; align-items: center; }
+      #info { width: 100%; align-items: center; }
+    }
+  </style>
 </head>
 <body>
 <div id="tetrisContainer">
@@ -127,13 +112,14 @@ button:hover {
   <div id="info">
     <div id="score">Score: 0</div>
     <div id="level">Level: 1</div>
-    <div id="speed">Speed: 1000</div>
+    <div id="speed">Speed: 1000ms</div>
     <div>Next:</div>
     <canvas id="nextCanvas" width="80" height="80"></canvas>
     <div id="bestScore">Best Score<br><span id="best">0</span></div>
     <div id="controls">
       <button id="muteBtn">Mute</button>
       <button id="resetBtn">Reset</button>
+      <button id="pauseBtn">Pause</button>
     </div>
   </div>
 </div>
@@ -146,15 +132,16 @@ const nextCanvas = document.getElementById('nextCanvas');
 const nctx = nextCanvas.getContext('2d');
 nctx.scale(10, 10);
 
-const arenaWidth = 12;
-const arenaHeight = 24;
+const arenaWidth = 12, arenaHeight = 24;
+const colors = [null, '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA726', '#AB47BC', '#5E35B1', '#FFEB3B'];
+const pieces = 'ILJOTSZ'.split('');
 
 function createMatrix(w, h) {
-  const matrix = [];
-  while (h--) matrix.push(new Array(w).fill(0));
-  return matrix;
+  return Array.from({length: h}, () => Array(w).fill(0));
 }
-
+function cloneMatrix(matrix) {
+  return matrix.map(row => [...row]);
+}
 function createPiece(type) {
   switch(type) {
     case 'T': return [[0,0,0],[1,1,1],[0,1,0]];
@@ -166,110 +153,66 @@ function createPiece(type) {
     case 'Z': return [[7,7,0],[0,7,7],[0,0,0]];
   }
 }
-
-const colors = [null, '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA726', '#AB47BC', '#5E35B1', '#FFEB3B'];
-
-const arena = createMatrix(arenaWidth, arenaHeight);
-
-let dropCounter = 0;
-let dropInterval = 1000;
-let lastTime = 0;
-let score = 0;
-let level = 1;
-let fastDrop = false;
-let paused = false;
-
-let fastDropAnimating = false;
-let fastDropTargetY = 0;
-let fastDropSpeed = 0.5;
-let shakeTimer = 0;
-const shakeDuration = 100;
-
-let muted = false;
-let bestScore = localStorage.getItem('tetrisBestScore') || 0;
-
-const pieces = 'ILJOTSZ';
-const player = {
-  pos: {x:0, y:0},
-  matrix: null
-};
-let nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
-
-function cloneMatrix(matrix) {
-  return matrix.map(row => row.slice());
-}
-
 function collide(arena, player) {
-  const m = player.matrix;
-  const o = player.pos;
-  for(let y=0; y<m.length; y++) {
-    for(let x=0; x<m[y].length; x++) {
-      if(m[y][x] !== 0 && (arena[y+o.y] && arena[y+o.y][x+o.x]) !== 0) {
+  const {matrix, pos} = player;
+  for(let y=0; y<matrix.length; ++y) {
+    for(let x=0; x<matrix[y].length; ++x) {
+      if(matrix[y][x] !== 0 &&
+        ((arena[y+pos.y] && arena[y+pos.y][x+pos.x]) !== 0 ||
+         y+pos.y >= arenaHeight || x+pos.x < 0 || x+pos.x >= arenaWidth)) {
         return true;
       }
     }
   }
   return false;
 }
-
 function merge(arena, player) {
-  player.matrix.forEach((row,y) => {
-    row.forEach((value,x) => {
-      if(value !== 0) {
+  player.matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if(value !== 0)
         arena[y + player.pos.y][x + player.pos.x] = value;
-      }
     });
   });
 }
-
 function rotate(matrix, dir) {
-  for(let y=0; y<matrix.length; y++) {
-    for(let x=y; x<matrix[y].length; x++) {
+  for(let y=0; y<matrix.length; ++y) {
+    for(let x=y; x<matrix[y].length; ++x) {
       [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
     }
   }
   if(dir > 0) matrix.forEach(row => row.reverse());
   else matrix.reverse();
 }
-
 function playerReset() {
   player.matrix = cloneMatrix(nextPiece);
   player.pos.y = 0;
-  player.pos.x = (arenaWidth / 2 | 0) - (player.matrix[0].length / 2 | 0);
+  player.pos.x = Math.floor(arenaWidth / 2) - Math.floor(player.matrix[0].length / 2);
   nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
   updateNext();
   if(collide(arena, player)) {
     arena.forEach(row => row.fill(0));
-    score = 0;
-    level = 1;
-    updateScore();
-    updateLevel();
-    updateSpeed();
+    score = 0; level = 1; dropInterval = 1000;
+    updateScore(); updateLevel(); updateSpeed();
+    playerReset();
   }
 }
-
 function getFilledRows() {
   const rows = [];
-  outer: for(let y=arena.length-1; y>=0; y--) {
-    for(let x=0; x<arena[y].length; x++) {
-      if(arena[y][x] === 0) continue outer;
-    }
-    rows.push(y);
+  for(let y=arena.length-1; y>=0; --y) {
+    if(arena[y].every(cell => cell !== 0)) rows.push(y);
   }
   return rows;
 }
 
 let flashRows = [];
-let flashAnimationDuration = 500;
+let flashAnimationDuration = 450;
 let flashAnimationElapsed = 0;
 let flashAnimating = false;
-
 function startFlashAnimation(rows) {
   flashRows = rows.map(y => ({ y, alpha: 1, height: 1 }));
   flashAnimationElapsed = 0;
   flashAnimating = true;
 }
-
 function updateFlashAnimation(deltaTime) {
   if(!flashAnimating) return;
   flashAnimationElapsed += deltaTime;
@@ -279,20 +222,19 @@ function updateFlashAnimation(deltaTime) {
     row.height = 1 - progress;
   });
   if(progress >= 1) {
-    const linesCleared = flashRows.length; // Satır sayısını burada alıyoruz
+    const linesCleared = flashRows.length;
     flashRows.forEach(row => {
       arena.splice(row.y, 1);
       arena.unshift(new Array(arenaWidth).fill(0));
     });
     flashAnimating = false;
     flashRows = [];
-    // Skor ve seviye güncellemesini satır sayısına göre yapıyoruz
     score += level * 10 * linesCleared;
     updateScore();
     level = Math.floor(score / 100) + 1;
     updateLevel();
     updateSpeed();
-    dropInterval = Math.max(100, dropInterval - 50);
+    dropInterval = Math.max(100, 1000 - 50 * (level-1));
     if(score > bestScore) {
       bestScore = score;
       localStorage.setItem('tetrisBestScore', bestScore);
@@ -300,36 +242,30 @@ function updateFlashAnimation(deltaTime) {
     }
   }
 }
-
 function playerSweep() {
   if(flashAnimating) return;
   const filled = getFilledRows();
-  if(filled.length > 0) {
+  if(filled.length>0) {
     startFlashAnimation(filled);
-    if(!muted) playSound(440, 200);
+    if(!muted) playSound(440 + filled.length*90, 130);
   }
 }
-
 function playerDrop() {
-  if(fastDropAnimating) return;
+  if(fastDropAnimating || flashAnimating) return;
   player.pos.y++;
   if(collide(arena, player)) {
     player.pos.y--;
     merge(arena, player);
     playerSweep();
     playerReset();
-    if(fastDrop) {
-      shakeTimer = shakeDuration;
-    }
+    if(fastDrop) shakeTimer = shakeDuration;
   }
   dropCounter = 0;
 }
-
 function playerMove(dir) {
   player.pos.x += dir;
   if(collide(arena, player)) player.pos.x -= dir;
 }
-
 function playerRotate(dir) {
   const pos = player.pos.x;
   rotate(player.matrix, dir);
@@ -337,15 +273,14 @@ function playerRotate(dir) {
   while(collide(arena, player)) {
     player.pos.x += offset;
     offset = -(offset + (offset > 0 ? 1 : -1));
-    if(offset > player.matrix[0].length) {
+    if(Math.abs(offset) > player.matrix[0].length) {
       rotate(player.matrix, -dir);
       player.pos.x = pos;
       return;
     }
   }
 }
-
-function drawMatrix(matrix, offset, context, shake = false) {
+function drawMatrix(matrix, offset, context, shake=false) {
   matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if(value !== 0) {
@@ -355,8 +290,8 @@ function drawMatrix(matrix, offset, context, shake = false) {
         let tx = x + offset.x;
         let ty = y + offset.y;
         if(shake) {
-          tx += (Math.random() * 0.4) - 0.2;
-          ty += (Math.random() * 0.4) - 0.2;
+          tx += (Math.random()*0.4)-0.2;
+          ty += (Math.random()*0.4)-0.2;
         }
         context.fillRect(tx, ty, 1, 1);
         context.strokeRect(tx, ty, 1, 1);
@@ -364,25 +299,22 @@ function drawMatrix(matrix, offset, context, shake = false) {
     });
   });
 }
-
 function draw() {
+  ctx.clearRect(0,0,arenaWidth,arenaHeight);
   ctx.fillStyle = 'rgba(0,0,0,0.8)';
-  ctx.fillRect(0, 0, arenaWidth, arenaHeight);
-
+  ctx.fillRect(0,0,arenaWidth,arenaHeight);
   ctx.strokeStyle = "#0ff";
   ctx.lineWidth = 0.1;
-  ctx.strokeRect(0, 0, arenaWidth, arenaHeight);
+  ctx.strokeRect(0,0,arenaWidth,arenaHeight);
 
-  const shake = fastDrop && shakeTimer > 0 ? (Math.random() * 0.4) - 0.2 : 0;
+  const shake = fastDrop && shakeTimer > 0 ? (Math.random()*0.4)-0.2 : 0;
   ctx.save();
   if(fastDrop && shakeTimer > 0) ctx.translate(shake, shake);
 
-  for(let y=0; y<arena.length; y++) {
-    if(!flashAnimating || !flashRows.some(fr => fr.y === y)) {
+  for(let y=0; y<arena.length; ++y) {
+    if(!flashAnimating || !flashRows.some(fr => fr.y === y))
       drawMatrix([arena[y]], {x:0, y}, ctx);
-    }
   }
-
   if(flashAnimating) {
     flashRows.forEach(row => {
       ctx.globalAlpha = row.alpha;
@@ -391,12 +323,9 @@ function draw() {
       ctx.globalAlpha = 1;
     });
   }
-
   drawMatrix(player.matrix, player.pos, ctx, fastDrop && shakeTimer > 0);
-
   ctx.restore();
 }
-
 function update(time=0) {
   if(paused) {
     requestAnimationFrame(update);
@@ -428,62 +357,77 @@ function update(time=0) {
         shakeTimer = 0;
       }
     } else {
-      if(dropCounter > dropInterval / level) playerDrop();
+      if(dropCounter > Math.max(100, dropInterval/level)) playerDrop();
     }
   }
-
   if(flashAnimating) updateFlashAnimation(deltaTime);
-
   draw();
   requestAnimationFrame(update);
 }
-
 function updateScore() {
   document.getElementById('score').innerText = `Score: ${score}`;
 }
-
 function updateLevel() {
   document.getElementById('level').innerText = `Level: ${level}`;
 }
-
 function updateSpeed() {
-  document.getElementById('speed').innerText = `Speed: ${Math.floor(dropInterval / level)}ms`;
+  document.getElementById('speed').innerText = `Speed: ${Math.floor(Math.max(100, dropInterval/level))}ms`;
 }
-
 function updateNext() {
+  nctx.clearRect(0,0,nextCanvas.width/10,nextCanvas.height/10);
   nctx.fillStyle = "#222";
-  nctx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+  nctx.fillRect(0,0,nextCanvas.width/10,nextCanvas.height/10);
   const offset = {
-    x: Math.floor((nextCanvas.width / 10 - nextPiece[0].length) / 2),
-    y: Math.floor((nextCanvas.height / 10 - nextPiece.length) / 2)
+    x: Math.floor((nextCanvas.width/10 - nextPiece[0].length)/2),
+    y: Math.floor((nextCanvas.height/10 - nextPiece.length)/2)
   };
   drawMatrix(nextPiece, offset, nctx);
 }
-
 function updateBestScore() {
   document.getElementById('best').innerText = bestScore;
+}
+
+// Kontroller
+let dropCounter = 0, dropInterval = 1000, lastTime = 0;
+let score = 0, level = 1, fastDrop = false, paused = false;
+let fastDropAnimating = false, fastDropTargetY = 0, fastDropSpeed = 0.5;
+let shakeTimer = 0, shakeDuration = 100;
+let muted = false;
+let bestScore = localStorage.getItem('tetrisBestScore') || 0;
+const arena = createMatrix(arenaWidth, arenaHeight);
+const player = { pos: {x:0, y:0}, matrix: null };
+let nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+
+// Ses Fonksiyonu
+function playSound(freq, duration) {
+  try {
+    const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    osc.connect(audioCtx.destination);
+    osc.start();
+    setTimeout(() => { osc.stop(); audioCtx.close(); }, duration);
+  } catch (e) {}
 }
 
 document.getElementById('muteBtn').addEventListener('click', () => {
   muted = !muted;
   document.getElementById('muteBtn').innerText = muted ? 'Unmute' : 'Mute';
 });
-
 document.getElementById('resetBtn').addEventListener('click', () => {
   arena.forEach(r => r.fill(0));
-  score = 0;
-  level = 1;
-  dropInterval = 1000;
+  score = 0; level = 1; dropInterval = 1000;
   playerReset();
-  updateScore();
-  updateLevel();
-  updateSpeed();
+  updateScore(); updateLevel(); updateSpeed();
 });
-
+document.getElementById('pauseBtn').addEventListener('click', () => {
+  paused = !paused;
+  document.getElementById('pauseBtn').innerText = paused ? 'Resume' : 'Pause';
+});
 document.addEventListener('keydown', event => {
   if(['ArrowLeft','ArrowRight','ArrowDown','ArrowUp',' '].includes(event.key)) event.preventDefault();
   if(paused && event.key !== 'Escape') return;
-
   if(event.key === 'ArrowLeft') playerMove(-1);
   else if(event.key === 'ArrowRight') playerMove(1);
   else if(event.key === 'ArrowDown') playerDrop();
@@ -492,16 +436,18 @@ document.addEventListener('keydown', event => {
     if(fastDropAnimating) return;
     fastDrop = true;
     fastDropTargetY = player.pos.y;
-    while(!collide(arena, {pos: {x: player.pos.x, y: fastDropTargetY + 1}, matrix: player.matrix})) fastDropTargetY++;
+    while(!collide(arena, {pos: {x: player.pos.x, y: fastDropTargetY+1}, matrix: player.matrix}))
+      fastDropTargetY++;
     fastDropAnimating = true;
-  } else if(event.key === 'Escape') paused = !paused;
+  } else if(event.key === 'Escape') {
+    paused = !paused;
+    document.getElementById('pauseBtn').innerText = paused ? 'Resume' : 'Pause';
+  }
 });
 
+// Başlat
 playerReset();
-updateScore();
-updateLevel();
-updateSpeed();
-updateBestScore();
+updateScore(); updateLevel(); updateSpeed(); updateBestScore();
 update();
 </script>
 </body>
