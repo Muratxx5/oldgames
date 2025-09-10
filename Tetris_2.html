@@ -32,22 +32,46 @@
       border: 1px solid rgba(255,255,255,0.08);
       padding: 24px;
       align-items: flex-start;
+      max-width: 100vw;
+      max-height: 96vh;
+      box-sizing: border-box;
+      overflow: auto;
     }
-    canvas {
-      background: #000;
+    .canvas-stack {
+      position: relative;
+      width: 300px;
+      height: 600px;
+      min-width: 180px;
+      min-height: 360px;
+    }
+    #gridBg {
+      position: absolute;
+      left: 0; top: 0;
+      z-index: 0;
+      width: 300px;
+      height: 600px;
+      pointer-events: none;
+      border-radius: 12px;
+    }
+    #tetris {
+      position: absolute;
+      left: 0; top: 0;
+      z-index: 1;
+      width: 300px; height: 600px;
       border-radius: 12px;
       border: 2px solid rgba(0,255,255,0.4);
       box-shadow: 0 0 20px rgba(0,255,255,0.13);
       display: block;
-    }
-    #tetris {
-      width: 300px; height: 600px;
+      background: transparent;
     }
     #info {
       display: flex;
       flex-direction: column;
       gap: 14px;
       width: 180px;
+      min-width: 90px;
+      align-items: stretch;
+      flex-shrink: 0;
     }
     #info div {
       background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(255,255,255,0.04));
@@ -101,14 +125,46 @@
       color: #ccc;
     }
     @media (max-width: 700px) {
-      #tetrisContainer { flex-direction: column; align-items: center; }
-      #info { width: 100%; align-items: center; }
+      #tetrisContainer {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        padding: 6px;
+      }
+      .canvas-stack {
+        width: 180px; height: 360px;
+        min-width: 120px; min-height: 240px;
+      }
+      #gridBg, #tetris {
+        width: 180px; height: 360px;
+      }
+      #info {
+        width: 110px;
+        min-width: 80px;
+        font-size: 13px;
+      }
+      #nextCanvas {
+        width: 44px; height: 44px;
+      }
+      button {
+        font-size: 12px; padding: 5px 9px;
+      }
+    }
+    @media (max-width: 400px) {
+      .canvas-stack, #gridBg, #tetris { width: 100px; height: 200px; }
+      #info { width: 60px; min-width: 44px; font-size: 10px;}
+      #nextCanvas { width: 22px; height: 22px;}
+      button { font-size: 10px; padding: 3px 5px;}
     }
   </style>
 </head>
 <body>
 <div id="tetrisContainer">
-  <canvas id="tetris" width="300" height="600"></canvas>
+  <div class="canvas-stack">
+    <canvas id="gridBg" width="300" height="600"></canvas>
+    <canvas id="tetris" width="300" height="600"></canvas>
+  </div>
   <div id="info">
     <div id="score">Score: 0</div>
     <div id="level">Level: 1</div>
@@ -124,6 +180,33 @@
   </div>
 </div>
 <script>
+// Ghost Grid Drawing
+const gridBgCanvas = document.getElementById('gridBg');
+const gridBgCtx = gridBgCanvas.getContext('2d');
+function drawGridBg(cellW, cellH, cols, rows) {
+  gridBgCtx.clearRect(0,0,gridBgCanvas.width,gridBgCanvas.height);
+  for(let y=0; y<rows; ++y) {
+    for(let x=0; x<cols; ++x) {
+      gridBgCtx.fillStyle = 'rgba(0,255,255,0.07)';
+      gridBgCtx.fillRect(x*cellW, y*cellH, cellW, cellH);
+      gridBgCtx.strokeStyle = 'rgba(255,255,255,0.10)';
+      gridBgCtx.lineWidth = 1;
+      gridBgCtx.strokeRect(x*cellW, y*cellH, cellW, cellH);
+    }
+  }
+  gridBgCtx.strokeStyle = 'rgba(0,255,255,0.12)';
+  gridBgCtx.lineWidth = 2;
+  gridBgCtx.strokeRect(0,0,gridBgCanvas.width,gridBgCanvas.height);
+}
+function resizeGridBg() {
+  let w = gridBgCanvas.clientWidth, h = gridBgCanvas.clientHeight;
+  gridBgCanvas.width = w; gridBgCanvas.height = h;
+  drawGridBg(w/12, h/24, 12, 24);
+}
+window.addEventListener('resize', resizeGridBg);
+resizeGridBg();
+
+// --- TETRIS LOGIC ---
 const canvas = document.getElementById('tetris');
 const ctx = canvas.getContext('2d');
 ctx.scale(25, 25);
@@ -301,6 +384,19 @@ function drawMatrix(matrix, offset, context, shake=false) {
 }
 function draw() {
   ctx.clearRect(0,0,arenaWidth,arenaHeight);
+  // Draw ghost grid under everything
+  ctx.save();
+  ctx.globalAlpha = 0.13;
+  ctx.strokeStyle = 'rgba(0,255,255,0.20)';
+  for(let y=0; y<arenaHeight; ++y) {
+    for(let x=0; x<arenaWidth; ++x) {
+      ctx.fillStyle = 'rgba(0,255,255,0.09)';
+      ctx.fillRect(x, y, 1, 1);
+      ctx.strokeRect(x, y, 1, 1);
+    }
+  }
+  ctx.restore();
+
   ctx.fillStyle = 'rgba(0,0,0,0.8)';
   ctx.fillRect(0,0,arenaWidth,arenaHeight);
   ctx.strokeStyle = "#0ff";
